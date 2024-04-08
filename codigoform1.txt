@@ -1,0 +1,56 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Data.SqlClient;
+
+namespace Zapateria
+{
+    public partial class Form1 : Form
+    {
+        SqlConnection cnx;
+        public Form1()
+        {
+            InitializeComponent();
+            this.CenterToScreen();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int count;
+                cnx = new SqlConnection("Server= localhost\\MSSQLSERVER03; Database= zapateria; Integrated Security=True;");
+                cnx.Open();
+                string query = "select * from empleados where id_empleado='"+txt_noempleado.Text.Trim()+"' and password='"+txt_password.Text+"';";
+                SqlCommand cmd = new SqlCommand(query,cnx);
+                count = Convert.ToInt32(cmd.ExecuteScalar());
+                cnx.Close();
+                if (count >= 1) {
+                    frmMenu frm = new frmMenu();
+                    this.Hide();
+                    frm.Show();
+                    //MessageBox.Show("Conexion establecida", "Aviso");
+                }
+                else
+                    MessageBox.Show("El numero de empleado y/o la contraseña son incorrectos.", "Datos incorrectos");
+            }
+            catch(Exception err)
+            {
+                MessageBox.Show(err.Message,"Error");
+            }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            
+        }
+    }
+}
+
+

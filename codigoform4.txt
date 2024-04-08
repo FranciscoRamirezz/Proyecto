@@ -1,0 +1,89 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Data.SqlClient;
+
+namespace Zapateria
+{
+    public partial class frmCodigos : Form
+    {
+        SqlConnection cnx;
+        public frmCodigos()
+        {
+            InitializeComponent();
+            this.CenterToScreen();
+            try
+            {
+                cnx = new SqlConnection("Server= localhost\\MSSQLSERVER03; Database= zapateria; Integrated Security=True;");
+                cnx.Open();
+                string query = "SELECT id_marca,nombre FROM cat_marcas";
+                SqlCommand cmd = new SqlCommand(query, cnx);
+                //count = Convert.ToInt32(cmd.ExecuteScalar());
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataSet ds = new DataSet();
+                da.Fill(ds, "Marcas");
+                cmb_marca.DisplayMember = "nombre";
+                cmb_marca.ValueMember = "id_marca";
+                cmb_marca.DataSource = ds.Tables["Marcas"];
+                cnx.Close();
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.Message, "Error");
+            }
+        }
+
+        private void btn_guardar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string query = "INSERT INTO calzado (id_marca, codigo, talla, precio, unidades)";
+                query += " VALUES (@idmarca, @codigo, @talla, @precio, @unidades);";
+                cnx.Open();
+                SqlCommand myCommand = new SqlCommand(query, cnx);
+                myCommand.Parameters.AddWithValue("@idmarca", int.Parse(cmb_marca.SelectedValue.ToString()));
+                myCommand.Parameters.AddWithValue("@codigo", txt_codigo.Text.ToUpper());
+                myCommand.Parameters.AddWithValue("@talla", float.Parse(txt_talla.Text));
+                myCommand.Parameters.AddWithValue("@precio", Convert.ToDecimal(txt_precio.Text));
+                myCommand.Parameters.AddWithValue("@unidades", int.Parse(txt_unidades.Text));
+                myCommand.ExecuteNonQuery();
+                cnx.Close();
+                MessageBox.Show("Registro agregado correctamente","Exito!");
+                cmb_marca.SelectedIndex = 0;
+                txt_codigo.Clear();
+                txt_talla.Clear();
+                txt_precio.Clear();
+                txt_unidades.Clear();
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.Message, "Error");
+            }
+        }
+
+        private void frmCodigos_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            frmMenu frm = new frmMenu();
+            frm.Show();
+        }
+
+        private void cmb_marca_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void frmCodigos_Load(object sender, EventArgs e)
+        {
+
+        }
+    }
+}
+
+
+

@@ -1,0 +1,73 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Data.SqlClient;
+
+namespace Zapateria
+{
+    public partial class frmGraficar : Form
+    {
+        SqlConnection cnx;
+        public frmGraficar()
+        {
+            InitializeComponent();
+            this.CenterToScreen();
+        }
+
+        private void btn_graficar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+
+                int count = 0;
+                cnx = new SqlConnection("Server= localhost\\MSSQLSERVER03; Database= zapateria; Integrated Security=True;");
+                cnx.Open();
+                string query = "select count(id_relacion)asignados,sum(case isnull(id_relacion,0) when 0 then 1 else 0 end)noasignados from calzado c left join rel_calzado_localidad rcl on c.id_zapato=rcl.id_zapato;";
+                SqlCommand cmd = new SqlCommand(query, cnx);
+                SqlDataReader rdr = cmd.ExecuteReader();
+                if (rdr.Read())
+                {
+                    chart1.Titles.Add("Calzado asignado");
+                    chart1.Series["s1"].IsValueShownAsLabel = true;
+                    chart1.Series["s1"].Points.AddXY("Asignados", rdr["asignados"].ToString());
+                    chart1.Series["s1"].Points.AddXY("No asignados", rdr["noasignados"].ToString());
+
+                }
+                else
+                    MessageBox.Show("No existen datos en la BD.", "Sin resultados");
+                cnx.Close();
+
+
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.Message, "Error");
+            }
+        }
+
+        private void frmGraficar_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            frmMenu frm = new frmMenu();
+            frm.Show();
+        }
+
+        private void chart1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void frmGraficar_Load(object sender, EventArgs e)
+        {
+
+        }
+    }
+}
+
+
+

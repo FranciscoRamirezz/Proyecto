@@ -1,0 +1,268 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Configuration;
+using System.Data.SqlClient;
+
+namespace Zapateria
+{
+    public partial class frmAsignarCodigosLocalidad : Form
+    {
+        SqlConnection cnx;
+        DataTable dt_calzado;
+        public frmAsignarCodigosLocalidad()
+        {
+            InitializeComponent();
+            this.CenterToScreen();
+            llenar_localidad();
+            llenar_calzado();
+        }
+
+        private void btnAsignarLocalidad_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                bool pase = true;
+                List<DataGridViewRow> rows_localidad = new List<DataGridViewRow>();
+                List<DataGridViewRow> rows_zapatos = new List<DataGridViewRow>();
+                foreach (DataGridViewRow row in dataGridView1.Rows)
+                {
+                    if (Convert.ToBoolean(row.Cells[chk_localidad.Name].Value) == true)
+                    {
+                        rows_localidad.Add(row);
+                    }
+                }
+                foreach (DataGridViewRow row in dataGridView2.Rows)
+                {
+                    if (Convert.ToBoolean(row.Cells[chk_zapato.Name].Value) == true)
+                    {
+                        if (row.Cells["Estatus"].Value.ToString() == "ASIGNADO")
+                        {
+                            pase = false;
+                            break;
+                        }
+                        rows_zapatos.Add(row);
+                    }
+                }
+                if (rows_localidad.Count <= 0)
+                    MessageBox.Show("Selecciona una localidad de la lista", "Aviso");
+                else if (pase==false)
+                    MessageBox.Show("Solo puedes seleccionar calzado que no este asignado, verifica tu seleccion", "Aviso");
+                else if (rows_localidad.Count != 1)
+                    MessageBox.Show("Solo puedes asignar calzado a una localida, selecciona solamente una de la lista.", "Aviso");
+                else if (rows_zapatos.Count <= 0)
+                    MessageBox.Show("Selecciona al menos un codigo de zapato de la lista de calzado para poder asignarlos a una localidad.", "Aviso");
+                else
+                {
+                    cnx = new SqlConnection("Server= localhost\\MSSQLSERVER03; Database= zapateria; Integrated Security=True;");
+                    SqlTransaction transaction;
+
+                    cnx.Open();
+                    transaction = cnx.BeginTransaction();
+                    try
+                    {
+                        string id_localidad = rows_localidad[0].Cells[1].Value.ToString();
+                        string id_zapato = "";
+                        for (int i = 0; i < rows_zapatos.Count; i++)
+                        {
+                            id_zapato=rows_zapatos[i].Cells[1].Value.ToString();
+                            new SqlCommand("INSERT INTO rel_calzado_localidad(id_localidad,id_zapato)VALUES("+id_localidad+","+id_zapato+");", cnx, transaction)
+                           .ExecuteNonQuery();
+                        }
+                        transaction.Commit();
+                    }
+                    catch (SqlException sqlError)
+                    {
+                        transaction.Rollback();
+                        MessageBox.Show(sqlError.Message, "Error en transaccion");
+                    }
+                    cnx.Close();
+                    MessageBox.Show("Los registros se asignaron correctamente.","Aviso");
+                    //dataGridView2.Rows.Clear();
+                    //dataGridView2.Refresh();
+                    llenar_calzado();
+                }
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.Message, "Error");
+            }
+            //MessageBox.Show(rows_localidad[0].Cells[1].Value.ToString(), "IDS seleccionados");
+
+        }
+
+        private void frmAsignarCodigosLocalidad_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            frmMenu frm = new frmMenu();
+            frm.Show();
+        }
+        private void llenar_localidad()
+        {
+            try
+            {
+
+                int count = 0;
+                cnx = new SqlConnection("Server= localhost\\MSSQLSERVER03; Database= zapateria; Integrated Security=True;");
+                cnx.Open();
+                string query = "select id_localidad,pasillo Pasillo,numero_anaquel as 'Anaquel',nivel_anaquel Nivel,lado Lado from localidad order by pasillo,numero_anaquel";
+                SqlCommand cmd = new SqlCommand(query, cnx);
+                //count = Convert.ToInt32(cmd.ExecuteScalar());
+                SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                DataSet ds = new DataSet();
+                adapter.Fill(ds);
+                count = ds.Tables[0].Rows.Count;
+                if (count >= 1)
+                {
+                    cmd = new SqlCommand(query, cnx);
+                    SqlDataAdapter data = new SqlDataAdapter(cmd);
+                    DataTable tabla = new DataTable();
+                    data.Fill(tabla);
+                    dataGridView1.DataSource = tabla;
+                    dataGridView1.Columns["id_localidad"].Visible = false;
+                }
+                else
+                    MessageBox.Show("No se encontro el codigo capturado en la base de datos.", "Sin resultados");
+                cnx.Close();
+
+
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.Message, "Error");
+            }
+        }
+        private void llenar_calzado()
+        {
+            try
+            {
+
+                int count = 0;
+                cnx = new SqlConnection("Server= localhost\\MSSQLSERVER03; Database= zapateria; Integrated Security=True;");
+                cnx.Open();
+                string query = "select a.id_zapato,ISNULL(c.id_relacion,0)id_relacion,CASE ISNULL(c.id_zapato,'') WHEN '' THEN'NO ASIGNADO' ELSE'ASIGNADO' END Estatus,codigo as 'Codigo',b.nombre as 'Marca',talla as 'Talla',precio as 'Precio',unidades as 'Unidades' " +
+                    "from calzado a inner join cat_marcas b on a.id_marca = b.id_marca left join rel_calzado_localidad c on c.id_zapato = a.id_zapato order by a.codigo";
+                SqlCommand cmd = new SqlCommand(query, cnx);
+                //count = Convert.ToInt32(cmd.ExecuteScalar());
+                SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                DataSet ds = new DataSet();
+                adapter.Fill(ds);
+                count = ds.Tables[0].Rows.Count;
+                if (count >= 1)
+                {
+                    cmd = new SqlCommand(query, cnx);
+                    SqlDataAdapter data = new SqlDataAdapter(cmd);
+                    dt_calzado = new DataTable();
+                    data.Fill(dt_calzado);
+                    dataGridView2.DataSource = dt_calzado;
+                    dataGridView2.Columns["id_zapato"].Visible = false;
+                    dataGridView2.Columns["id_relacion"].Visible = false;
+
+
+
+                }
+                else
+                    MessageBox.Show("No se encontro el codigo capturado en la base de datos.", "Sin resultados");
+                cnx.Close();
+
+
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.Message, "Error");
+            }
+        }
+
+        private void btnQuitar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                bool pase = true;
+                List<DataGridViewRow> rows_zapatos = new List<DataGridViewRow>();
+                foreach (DataGridViewRow row in dataGridView2.Rows)
+                {
+                    if (Convert.ToBoolean(row.Cells[chk_zapato.Name].Value) == true)
+                    {
+                        if (row.Cells["Estatus"].Value.ToString() == "NO ASIGNADO")
+                        {
+                            pase = false;
+                            break;
+                        }
+                        rows_zapatos.Add(row);
+                    }
+                }
+                if (pase == false)
+                    MessageBox.Show("Solo puedes seleccionar calzado que este asignado, verifica tu seleccion", "Aviso");
+                else if (rows_zapatos.Count <= 0)
+                    MessageBox.Show("Selecciona al menos un codigo de zapato de la lista de calzado para poder quitar la localidad.", "Aviso");
+                else
+                {
+                    cnx = new SqlConnection("Server= localhost\\MSSQLSERVER03; Database= zapateria; Integrated Security=True;");
+                    SqlTransaction transaction;
+
+                    cnx.Open();
+                    transaction = cnx.BeginTransaction();
+                    try
+                    {
+                        string id_relacion = "";
+                        for (int i = 0; i < rows_zapatos.Count; i++)
+                        {
+                            id_relacion = rows_zapatos[i].Cells[2].Value.ToString();
+                            new SqlCommand("DELETE FROM rel_calzado_localidad WHERE id_relacion=" + id_relacion + ";", cnx, transaction)
+                           .ExecuteNonQuery();
+                        }
+                        transaction.Commit();
+                    }
+                    catch (SqlException sqlError)
+                    {
+                        transaction.Rollback();
+                        MessageBox.Show(sqlError.Message, "Error en transaccion");
+                    }
+                    cnx.Close();
+                    MessageBox.Show("Los registros se asignaron correctamente.", "Aviso");
+                    //dataGridView2.Rows.Clear();
+                    //dataGridView2.Refresh();
+                    llenar_calzado();
+                }
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.Message, "Error");
+            }
+        }
+
+        private void txt_buscar_TextChanged(object sender, EventArgs e)
+        {
+            //if(txt_buscar.Text.Trim()!="")
+            //  (dataGridView2.DataSource as DataTable).DefaultView.RowFilter = string.Format("Codigo = '{0}'", txt_buscar.Text);
+            //(dataGridView2.DataSource as DataTable).DefaultView.RowFilter = string.Format("Field = '{4}'", txt_buscar.Text);
+            //string country = ddlCountry.SelectedItem.Value;
+            /*DataTable dt = (dataGridView2.DataSource as DataTable);
+            DataView dataView = dt.DefaultView;
+            if (!string.IsNullOrEmpty(txt_buscar.Text))
+            {
+                dataView.RowFilter = "Codigo = '" + txt_buscar.Text + "'";
+            }
+            dataGridView2.DataSource = dataView;*/
+            //dataGridView2.DataBind();
+            BindingSource bs = new BindingSource();
+            bs.DataSource = dt_calzado;
+            bs.Filter = "Codigo like '%" + txt_buscar.Text.Trim() + "%'";
+            // Reset the datagridview content
+            //dataGridView2.Columns.Clear();
+            dataGridView2.DataSource = bs;
+        }
+
+        private void frmAsignarCodigosLocalidad_Load(object sender, EventArgs e)
+        {
+
+        }
+    }
+}
+
+

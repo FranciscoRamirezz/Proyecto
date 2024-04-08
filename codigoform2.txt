@@ -1,0 +1,68 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace Zapateria
+{
+    public partial class frmMenu : Form
+    {
+        public frmMenu()
+        {
+            InitializeComponent();
+            this.CenterToScreen();
+        }
+
+        private void btnConsultaCodigos_Click(object sender, EventArgs e)
+        {
+            frmConsultar frmc = new frmConsultar();
+            this.Close();
+            frmc.Show();
+
+        }
+
+        private void btnAsignaCodigos_Click(object sender, EventArgs e)
+        {
+            frmAsignarCodigosLocalidad frm = new frmAsignarCodigosLocalidad();
+            this.Close();
+            frm.Show();
+        }
+
+        private void btn_calzado_Click(object sender, EventArgs e)
+        {
+            frmCodigos frm = new frmCodigos();
+            this.Close();
+            frm.Show();
+        }
+
+        private void btn_localidad_Click(object sender, EventArgs e)
+        {
+            frmAgregarLocalidad frm = new frmAgregarLocalidad();
+            this.Close();
+            frm.Show();
+        }
+
+        private void btn_graficar_Click(object sender, EventArgs e)
+        {
+            frmGraficar frm= new frmGraficar();
+            this.Close();
+            frm.Show();
+        }
+
+       
+
+        private void frmMenu_Load(object sender, EventArgs e)
+        {
+          
+        }
+
+      
+    }
+}
+
+

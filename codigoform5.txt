@@ -1,0 +1,65 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Data.SqlClient;
+
+namespace Zapateria
+{
+    public partial class frmAgregarLocalidad : Form
+    {
+        SqlConnection cnx;
+        public frmAgregarLocalidad()
+        {
+            InitializeComponent();
+            this.CenterToScreen();
+        }
+
+        private void btnGuardar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string query = "INSERT INTO localidad ( pasillo, numero_anaquel, nivel_anaquel, lado)";
+                query += " VALUES (@pasillo, @numero_anaquel, @nivel_anaquel, @lado);";
+                cnx = new SqlConnection("Server= localhost\\MSSQLSERVER03; Database= zapateria; Integrated Security=True;");
+                cnx.Open();
+                SqlCommand myCommand = new SqlCommand(query, cnx);
+                myCommand.Parameters.AddWithValue("@pasillo", txt_pasillo.Text.ToUpper());
+                myCommand.Parameters.AddWithValue("@numero_anaquel", int.Parse(txt_numero_anaquel.Text));
+                myCommand.Parameters.AddWithValue("@nivel_anaquel", txt_nivel.Text.ToUpper());
+                myCommand.Parameters.AddWithValue("@lado", txt_lado.Text.ToUpper());
+
+
+                myCommand.ExecuteNonQuery();
+                cnx.Close();
+                MessageBox.Show("Registro agregado correctamente", "Exito!");
+                txt_pasillo.Clear();
+                txt_numero_anaquel.Clear();
+                txt_nivel.Clear();
+                txt_lado.Clear();
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.Message, "Error");
+            }
+        }
+
+        private void frmAgregarLocalidad_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            frmMenu frm = new frmMenu();
+            frm.Show();
+        }
+
+        private void frmAgregarLocalidad_Load(object sender, EventArgs e)
+        {
+
+        }
+    }
+}
+
+

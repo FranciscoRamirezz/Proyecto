@@ -1,0 +1,180 @@
+USE [master]
+GO
+/****** Object:  Database [zapateria]    Script Date: 09/03/2024 08:05:15 p. m. ******/
+CREATE DATABASE [zapateria]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'zapateria', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA\zapateria.mdf' , SIZE = 8192KB , MAXSIZE = UNLIMITED, FILEGROWTH = 65536KB )
+ LOG ON 
+( NAME = N'zapateria_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA\zapateria_log.ldf' , SIZE = 8192KB , MAXSIZE = 2048GB , FILEGROWTH = 65536KB )
+ WITH CATALOG_COLLATION = DATABASE_DEFAULT, LEDGER = OFF
+GO
+ALTER DATABASE [zapateria] SET COMPATIBILITY_LEVEL = 160
+GO
+IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
+begin
+EXEC [zapateria].[dbo].[sp_fulltext_database] @action = 'enable'
+end
+GO
+ALTER DATABASE [zapateria] SET ANSI_NULL_DEFAULT OFF 
+GO
+ALTER DATABASE [zapateria] SET ANSI_NULLS OFF 
+GO
+ALTER DATABASE [zapateria] SET ANSI_PADDING OFF 
+GO
+ALTER DATABASE [zapateria] SET ANSI_WARNINGS OFF 
+GO
+ALTER DATABASE [zapateria] SET ARITHABORT OFF 
+GO
+ALTER DATABASE [zapateria] SET AUTO_CLOSE OFF 
+GO
+ALTER DATABASE [zapateria] SET AUTO_SHRINK OFF 
+GO
+ALTER DATABASE [zapateria] SET AUTO_UPDATE_STATISTICS ON 
+GO
+ALTER DATABASE [zapateria] SET CURSOR_CLOSE_ON_COMMIT OFF 
+GO
+ALTER DATABASE [zapateria] SET CURSOR_DEFAULT  GLOBAL 
+GO
+ALTER DATABASE [zapateria] SET CONCAT_NULL_YIELDS_NULL OFF 
+GO
+ALTER DATABASE [zapateria] SET NUMERIC_ROUNDABORT OFF 
+GO
+ALTER DATABASE [zapateria] SET QUOTED_IDENTIFIER OFF 
+GO
+ALTER DATABASE [zapateria] SET RECURSIVE_TRIGGERS OFF 
+GO
+ALTER DATABASE [zapateria] SET  DISABLE_BROKER 
+GO
+ALTER DATABASE [zapateria] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
+GO
+ALTER DATABASE [zapateria] SET DATE_CORRELATION_OPTIMIZATION OFF 
+GO
+ALTER DATABASE [zapateria] SET TRUSTWORTHY OFF 
+GO
+ALTER DATABASE [zapateria] SET ALLOW_SNAPSHOT_ISOLATION OFF 
+GO
+ALTER DATABASE [zapateria] SET PARAMETERIZATION SIMPLE 
+GO
+ALTER DATABASE [zapateria] SET READ_COMMITTED_SNAPSHOT OFF 
+GO
+ALTER DATABASE [zapateria] SET HONOR_BROKER_PRIORITY OFF 
+GO
+ALTER DATABASE [zapateria] SET RECOVERY FULL 
+GO
+ALTER DATABASE [zapateria] SET  MULTI_USER 
+GO
+ALTER DATABASE [zapateria] SET PAGE_VERIFY CHECKSUM  
+GO
+ALTER DATABASE [zapateria] SET DB_CHAINING OFF 
+GO
+ALTER DATABASE [zapateria] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
+GO
+ALTER DATABASE [zapateria] SET TARGET_RECOVERY_TIME = 60 SECONDS 
+GO
+ALTER DATABASE [zapateria] SET DELAYED_DURABILITY = DISABLED 
+GO
+ALTER DATABASE [zapateria] SET ACCELERATED_DATABASE_RECOVERY = OFF  
+GO
+EXEC sys.sp_db_vardecimal_storage_format N'zapateria', N'ON'
+GO
+ALTER DATABASE [zapateria] SET QUERY_STORE = ON
+GO
+ALTER DATABASE [zapateria] SET QUERY_STORE (OPERATION_MODE = READ_WRITE, CLEANUP_POLICY = (STALE_QUERY_THRESHOLD_DAYS = 30), DATA_FLUSH_INTERVAL_SECONDS = 900, INTERVAL_LENGTH_MINUTES = 60, MAX_STORAGE_SIZE_MB = 1000, QUERY_CAPTURE_MODE = AUTO, SIZE_BASED_CLEANUP_MODE = AUTO, MAX_PLANS_PER_QUERY = 200, WAIT_STATS_CAPTURE_MODE = ON)
+GO
+USE [zapateria]
+GO
+/****** Object:  Table [dbo].[calzado]    Script Date: 09/03/2024 08:05:15 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[calzado](
+	[id_zapato] [int] IDENTITY(1,1) NOT NULL,
+	[id_marca] [int] NULL,
+	[codigo] [varchar](150) NULL,
+	[talla] [float] NULL,
+	[precio] [decimal](18, 2) NULL,
+	[unidades] [int] NULL,
+ CONSTRAINT [PK_calzado] PRIMARY KEY CLUSTERED 
+(
+	[id_zapato] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[cat_marcas]    Script Date: 09/03/2024 08:05:15 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[cat_marcas](
+	[id_marca] [int] IDENTITY(1,1) NOT NULL,
+	[nombre] [varchar](100) NOT NULL,
+ CONSTRAINT [PK_cat_marcas] PRIMARY KEY CLUSTERED 
+(
+	[id_marca] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[empleados]    Script Date: 09/03/2024 08:05:15 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[empleados](
+	[id_empleado] [int] IDENTITY(1,1) NOT NULL,
+	[nombre] [varchar](100) NULL,
+	[password] [varchar](100) NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[localidad]    Script Date: 09/03/2024 08:05:15 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[localidad](
+	[id_localidad] [int] IDENTITY(1,1) NOT NULL,
+	[pasillo] [varchar](50) NULL,
+	[numero_anaquel] [int] NULL,
+	[nivel_anaquel] [varchar](50) NULL,
+	[lado] [varchar](50) NULL,
+ CONSTRAINT [PK_localidad] PRIMARY KEY CLUSTERED 
+(
+	[id_localidad] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[rel_calzado_localidad]    Script Date: 09/03/2024 08:05:15 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[rel_calzado_localidad](
+	[id_relacion] [int] IDENTITY(1,1) NOT NULL,
+	[id_localidad] [int] NOT NULL,
+	[id_zapato] [int] NOT NULL,
+ CONSTRAINT [PK_rel_calzado_localidad] PRIMARY KEY CLUSTERED 
+(
+	[id_relacion] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[calzado]  WITH CHECK ADD  CONSTRAINT [FK_calzado_cat_marcas] FOREIGN KEY([id_marca])
+REFERENCES [dbo].[cat_marcas] ([id_marca])
+GO
+ALTER TABLE [dbo].[calzado] CHECK CONSTRAINT [FK_calzado_cat_marcas]
+GO
+ALTER TABLE [dbo].[rel_calzado_localidad]  WITH CHECK ADD  CONSTRAINT [FK_rel_calzado_localidad_calzado] FOREIGN KEY([id_zapato])
+REFERENCES [dbo].[calzado] ([id_zapato])
+GO
+ALTER TABLE [dbo].[rel_calzado_localidad] CHECK CONSTRAINT [FK_rel_calzado_localidad_calzado]
+GO
+ALTER TABLE [dbo].[rel_calzado_localidad]  WITH CHECK ADD  CONSTRAINT [FK_rel_calzado_localidad_localidad] FOREIGN KEY([id_localidad])
+REFERENCES [dbo].[localidad] ([id_localidad])
+GO
+ALTER TABLE [dbo].[rel_calzado_localidad] CHECK CONSTRAINT [FK_rel_calzado_localidad_localidad]
+GO
+USE [master]
+GO
+ALTER DATABASE [zapateria] SET  READ_WRITE 
+GO
